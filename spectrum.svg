@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	 <script type="text/javascript" href="spectrum.js" />
+</head>
+<body>
+<svg id="x"  xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"	
+         height="100%" width="100%">
+        
+        
+       
+	
+	<text x="4%" y="6%" font-family="Verdana" >Spectrum Editor</text>
+	
+	<g >
+	<rect id="spectrum-rect" x="20%" y="4%" width="75%" height="20%" fill="none" stroke="black"
+	stroke-width="0.5" /></g>
+	<g>
+	<rect id="red-rect" x="20%" y="28%" width="75%" height="20%" fill="none" stroke="red"
+	stroke-width="0.5" />
+	</g>
+	<g>
+	<rect id="green-rect" x="20%" y="52%" width="75%" height="20%" fill="none" stroke="green"
+	stroke-width="0.5" /></g>
+	<g>
+	<rect id="blue-rect" x="20%" y="76%" width="75%" height="20%" fill="none" stroke="blue"
+	stroke-width="0.5" /></g>
+	
+	
+	
+	
+</svg>
+</body>
+</html>
