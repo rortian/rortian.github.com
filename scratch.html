@@ -1,8 +1,8 @@
 <!doctype html>
-<html>
+<html xmlns:ng="http://angularjs.org" xmlns:fractal="http://www.pseudopattern.com">
   <head>
     <title>Scratch</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js" type="text/javascript"></script>
+    <script src="http://code.angularjs.org/angular-0.9.15.js" type="text/javascript" ng:autobind></script>
     <script type="text/javascript">
 
 function makeSVG(tag, attrs) {
@@ -21,12 +21,9 @@ function use_this(id){
 function defs(args){
   var defs = makeSVG('defs',{})
   var paths = define_paths(args)
-  var circles = define_circles(args)
   var collections = define_collections(args)
   for(var k in paths)
     defs.appendChild(paths[k])
-  for(var k in circles)
-    defs.appendChild(circles[k])
   for(var k in collections)
     defs.appendChild(collections[k])
   return defs
@@ -36,16 +33,16 @@ function define_collections(args){
   var to_return = []
   var rs = args.rs
   var smallest_index = rs.length - 1
-  var smallest = makeSVG('g',{id:"collection"+(smallest_index-1)})
-  smallest.appendChild(use_this("#all"+(smallest_index-1)))
-  var smaller = smaller_circles({num:smallest_index,r:rs[smallest_index],ref:"all"})
+  var smallest = makeSVG('g',{id:"collection"+(smallest_index-1)+args.ns})
+  smallest.appendChild(use_this("#circle"+(smallest_index-1)+args.ns))
+  var smaller = smaller_circles({ns:args.ns,num:smallest_index,r:rs[smallest_index],ref:"circle"})
   for(var k in smaller)
     smallest.appendChild(smaller[k])
   to_return.push(smallest)
   for(var i =smallest_index-2;i>=0;i--){
-    var holder = makeSVG('g',{id:"collection"+i})
-    holder.appendChild(use_this("#all"+i))
-    smaller = smaller_circles({num:(i+1),r:rs[i+1],ref:"collection"})
+    var holder = makeSVG('g',{id:"collection"+i+args.ns})
+    holder.appendChild(use_this("#circle"+i+args.ns))
+    smaller = smaller_circles({ns:args.ns,num:(i+1),r:rs[i+1],ref:"collection"})
     for(var k in smaller)
       holder.appendChild(smaller[k])
     to_return.push(holder)
@@ -56,7 +53,7 @@ function define_collections(args){
 function smaller_circles(args){
   var to_return = []
   var d = 2*args.r
-  var using = "#" + args.ref + args.num
+  var using = "#" + args.ref + args.num + args.ns
   var transform = "translate("+d+")"
   var group = makeSVG('g',{transform:transform})
   group.appendChild(use_this(using))
@@ -80,86 +77,60 @@ function smaller_circles(args){
   return to_return
 }
 
-function define_circles(args){
-  var to_return = []
-  var rs = args.rs
-  for(var k in rs){
-    to_return[k] = make_circle({num:k,r:rs[k]})
-  }
-  return to_return
-}
-
 
 function define_paths(args){
   var to_return = []
   for(var k in args.rs){
-    to_return[k] = make_def_path({r:args.rs[k],num:k,color:args.colors[k]}) 
+    to_return[k] = make_def_path({r:args.rs[k],num:k,ns:args.ns,color:args.colors[k]}) 
   }
   return to_return
 }
 
-function make_circle(args){
-  var all = makeSVG('g',{id:"all"+args.num})
-  var use = use_this("#circle"+args.num)
-
-  all.appendChild(use)
-  all.appendChild(quad_one(args))
-  all.appendChild(quad_three(args))
-  all.appendChild(quad_four(args))
-
-  return all
-
-}
-
-function quad_one(args){
-  var r = args.r
-  var use = use_this("#circle"+args.num)
-
-  var transform_string = "translate("+r+") rotate(90,"
-  transform_string += r/2 +","+ r/2 +")"
-
-  var group = makeSVG('g',{transform:transform_string})
-
-  group.appendChild(use)
-
-  return group;
-}
-
-function quad_three(args){
-  var r = args.r
-  var use = use_this("#circle"+args.num)
-
-  var transform_string = "translate(0,"+r+") rotate(-90,"
-  transform_string += r/2 +","+ r/2 +")"
-
-  var group = makeSVG('g',{transform:transform_string})
-
-  group.appendChild(use)
-
-  return group;
-}
-
-function quad_four(args){
-  var r = args.r
-  var use = use_this("#circle"+args.num)
-
-  var transform_string = "translate("+r+","+r+") rotate(180,"
-  transform_string += r/2 +","+ r/2 +")"
-
-  var group = makeSVG('g',{transform:transform_string})
-
-  group.appendChild(use)
-
-  return group;
-}
 
 function make_def_path(args){
   var style = "fill:"+args.color+";fill-opacity:1"
-  return makeSVG('path',{d:first_part(args.r),id:"circle"+args.num, style:style})
+  var path = first_part(args.r)+second_part(args.r)+third_part(args.r)+fourth_part(args.r)
+  return makeSVG('path',{d:path,id:"circle"+args.num+args.ns, style:style})
 }
 
 function first_part(r){
   return "M " + r + ",0 " + figure_out_ellipse(r) + " z "
+}
+
+function third_part(r){
+  return "M " + r + ","+ 2*r + third_ellipse(r) + " z "
+}
+
+function second_part(r){
+  return "M " + r + ",0 " + right_ellipse(r) + " z "
+}
+
+function fourth_part(r){
+  return "M " + r + ","+ 2*r + fourth_ellipse(r) + " z "
+}
+
+function fourth_ellipse(r){
+  var first_leg = "a"+r+","+r+" 0 0,0 "+r+","+(-r)
+  var second_leg = "a"+r/3+","+r/3+" 0 0,1 "+(-2*r/3)+",0"
+  var third_leg = "a"+r/3+","+r/3+" 0 0,1 "+-r/3+","+r/3
+  var fourth_leg = "a"+r/3+","+r/3+" 0 0,1 0,"+2*r/3
+  return first_leg + second_leg + third_leg + fourth_leg
+}
+
+function right_ellipse(r){
+  var first_leg = "a"+r+","+r+" 0 0,1 "+r+","+r
+  var second_leg = "a"+r/3+","+r/3+" 0 0,0 "+(-2*r/3)+",0"
+  var third_leg = "a"+r/3+","+r/3+" 0 0,0 "+-r/3+","+(-r/3)
+  var fourth_leg = "a"+r/3+","+r/3+" 0 0,0 0,"+(-2*r/3)
+  return first_leg + second_leg + third_leg + fourth_leg
+}
+
+function third_ellipse(r){
+  var first_leg = "a"+r+","+r+" 0 0,1 "+(-r)+","+-r
+  var second_leg = "a"+r/3+","+r/3+" 0 0,0 "+2*r/3+",0"
+  var third_leg = "a"+r/3+","+r/3+" 0 0,0 "+r/3+","+(r/3)
+  var fourth_leg = "a"+r/3+","+r/3+" 0 0,0 0,"+(2*r/3)
+  return first_leg + second_leg + third_leg + fourth_leg
 }
 
 function figure_out_ellipse(r){
@@ -180,23 +151,84 @@ function make_design(params){
   if(params.r == undefined){
     params['r'] = 364.5
   }
+  if(params.offset == undefined){
+    params['offset'] = 0
+  }
+  if(params.ns == undefined){
+    params['ns'] = ""
+  }
   var rs = []
   var colors = []
   for(var i = 0;i<params.iterations;i++){
     rs[i] = params.r / (Math.pow(3,i))
-    colors[i] = params.colors[i % params.colors.length]
+    colors[i] = params.colors[(params.offset + i) % params.colors.length]
   }
-  var ds = defs({rs:rs,colors:colors})
-  $('svg').append(ds)
-  $('svg').append(use_this("#collection0"))
+  var ds = defs({rs:rs,colors:colors,ns:params.ns})
+  var svg = makeSVG('svg',{version:"1.1",id:params.id,width:params.r*2,height:params.r*2})
+  svg.appendChild(ds)
+  svg.appendChild(use_this("#collection0"+params.ns))
+  return svg
+}
+    </script>
+    <script>
+angular.widget('fractal:circle',function(compileElement){
+  var compiler = this
+  var what_value = compileElement.attr('what');
+  return function(linkElement){
+    var colors = this.c.colors
+    var index = this.$index
+    for(var x=0;x<colors.length;x++){
+      setTimeout(function(y){ return function(){ 
+        var svg = make_design({iterations:4,colors:colors,offset:y,r:95,id:"svg"+index+"n"+y,ns:"num"+index+"sub"+y})
+        linkElement.append(svg)
+    }}(x),index*100+10)
+    }
+  }
+})
+
+function FractalController($resource){
+  this.fun = ['hi']
+  this.Lovers = $resource(
+    "http://www.colourlovers.com/api/palettes/:what",
+    {format:'json',jsonCallback:'JSON_CALLBACK'},
+    {"new":{method:'JSON',isArray:true,params:{what:"new"}},
+     "top":{method:'JSON',isArray:true,params:{what:"top"}},
+     search:{method:'JSON',isArray:true},
+     random:{method:'JSON',isArray:true,params:{what:"random"}}}
+  )
+  this.gallery = []
 }
 
-$(document).ready(function(){
-    make_design({iterations:4})
-});
+
+FractalController.prototype = {
+  fetch: function(){
+    this.gallery = this.Lovers.new()
+  },
+  "top": function(){
+    this.gallery = this.Lovers.top()
+  },
+  search: function(){
+    this.gallery = this.Lovers.search({keywords:this.query})
+  },
+  random: function(){
+    this.gallery = this.Lovers.random()
+  }
+}
+
+FractalController.$inject = ['$resource']
+
     </script>
   </head>
   <body>
-    <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="729" height="729"></svg>
+    <div ng:controller="FractalController">
+      <div ng:init="fetch()"/>
+      <button ng:click="top()">Top</button>
+      <input type="text" name="query" /><button ng:click="search()">search</button>
+      <button ng:click="random()">random</button>
+      <div ng:repeat="c in gallery">
+        <h2>{{c.title}} by {{c.userName}}</h2>
+        <fractal:circle></fractal:circle>
+      </div>
+    </div>
   </body>
 </html>
