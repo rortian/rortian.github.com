@@ -1,0 +1,46 @@
+<!doctype html>
+<html xmlns:ng="http://angularjs.org">
+  <head>
+    <title>Scratch</title>
+    <script src="http://code.angularjs.org/angular-0.9.19.js" type="text/javascript" ng:autobind></script>
+    <script>
+
+function FractalClientController($resource){
+  this.fun = ['hi']
+  this.Lovers = $resource(
+    "http://www.colourlovers.com/api/palettes/:what",
+    {format:'json',jsonCallback:'JSON_CALLBACK'},
+    {"new":{method:'JSON',isArray:true,params:{what:"new"}},
+     "top":{method:'JSON',isArray:true,params:{what:"top"}},
+     search:{method:'JSON',isArray:true},
+     random:{method:'JSON',isArray:true,params:{what:"random"}}}
+  )
+  this.gallery = []
+}
+
+
+FractalClientController.prototype = {
+  fetch: function(){
+    this.gallery = this.Lovers.new()
+  },
+  "top": function(){
+    this.gallery = this.Lovers.top()
+  },
+  search: function(){
+    this.gallery = this.Lovers.search({keywords:this.query})
+  },
+  random: function(){
+    this.gallery = this.Lovers.random()
+  }
+}
+
+FractalClientController.$inject = ['$resource']
+
+    </script>
+  </head>
+  <body>
+    <div ng:controller="FractalClientController">
+      <h2>Hi!</h2>
+    </div>
+  </body>
+</html>
