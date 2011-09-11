@@ -29,7 +29,6 @@ function FractalClientController($resource){
       "locate":{method:'GET',params:{what:"location.json"}}
     }
   )
-  this.gallery = []
 }
 
 
@@ -51,6 +50,7 @@ FractalClientController.$inject = ['$resource']
     <div ng:controller="FractalClientController">
       <h2 ng:init="defs()">Hi!</h2>
       <div ng:init="fetch()"></div>
+      <img ng:src="fractal.url" />
     </div>
   </body>
 </html>
