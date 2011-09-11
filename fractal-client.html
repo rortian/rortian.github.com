@@ -50,7 +50,8 @@ FractalClientController.$inject = ['$resource']
     <div ng:controller="FractalClientController">
       <h2 ng:init="defs()">Hi!</h2>
       <div ng:init="fetch()"></div>
-      <input name="real_lambda" type="text" ng:validate="number:-30:30" />
+      Lambda = <input name="real_lambda" type="text" ng:validate="number:-30:30" /> + 
+               <input name="imag_lambda" type="text" ng:validate="number:-30:30" /> i <br/>
       <img ng:src="{{fractal.url}}" />
     </div>
   </body>
