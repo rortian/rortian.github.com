@@ -21,7 +21,6 @@ function FractalClientController($resource){
     numc:50,
     iter_max:49}
 
-  console.log(this.defaults);
 
   this.Lovers = $resource(
     "http://www.colourlovers.com/api/palettes/:what",
@@ -39,14 +38,8 @@ FractalClientController.prototype = {
   fetch: function(){
     this.gallery = this.Lovers.new()
   },
-  "top": function(){
-    this.gallery = this.Lovers.top()
-  },
-  search: function(){
-    this.gallery = this.Lovers.search({keywords:this.query})
-  },
-  random: function(){
-    this.gallery = this.Lovers.random()
+  defs: function(){
+    console.log(this.defaults);
   }
 }
 
@@ -56,7 +49,7 @@ FractalClientController.$inject = ['$resource']
   </head>
   <body>
     <div ng:controller="FractalClientController">
-      <h2>Hi!</h2>
+      <h2 ng:init="defs()">Hi!</h2>
     </div>
   </body>
 </html>
