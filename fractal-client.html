@@ -35,7 +35,7 @@ function FractalClientController($resource){
 
 FractalClientController.prototype = {
   fetch: function(){
-    this.gallery = this.Fractals.locate()
+    this.fractal = this.Fractals.locate()
   },
   defs: function(){
     console.log(this.defaults);
@@ -50,6 +50,7 @@ FractalClientController.$inject = ['$resource']
   <body>
     <div ng:controller="FractalClientController">
       <h2 ng:init="defs()">Hi!</h2>
+      <div ng:init="fetch()"></div>
     </div>
   </body>
 </html>
