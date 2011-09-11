@@ -50,12 +50,14 @@ FractalClientController.$inject = ['$resource']
     <div ng:controller="FractalClientController">
       <h2 ng:init="defs()">Hi!</h2>
       <div ng:init="fetch()"></div>
-      x = <input name="x" type="text" ng:validate="integer:1:3000" />
-      y = <input name="y" type="text" ng:validate="integer:1:3000" />
-      m = <input name="m" type="text" ng:validate="integer:1:10" />
-      n = <input name="n" type="text" ng:validate="integer:1:10" />
-      xmin = <input name="xmin" type="text" ng:validate="number:-3:3" />
-      ymin = <input name="ymin" type="text" ng:validate="number:-3:3" />
+      x = <input name="x" type="text" ng:validate="integer:1:3000" /><br/>
+      y = <input name="y" type="text" ng:validate="integer:1:3000" /><br/>
+      m = <input name="m" type="text" ng:validate="integer:1:10" /><br/>
+      n = <input name="n" type="text" ng:validate="integer:1:10" /><br/>
+      xmin = <input name="xmin" type="text" ng:validate="number:-3:3" /><br/>
+      ymin = <input name="ymin" type="text" ng:validate="number:-3:3" /><br/>
+      xspan = <input name="xspan" type="text" ng:validate="number:1e-8:6" /><br/>
+      yspan = <input name="yspan" type="text" ng:validate="number:1e-8:6" /><br/>
       Lambda = <input name="real_lambda" type="text" ng:validate="number:-30:30" /> + 
                <input name="imag_lambda" type="text" ng:validate="number:-30:30" /> i <br/>
       <img ng:src="{{fractal.url}}" />
