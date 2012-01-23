@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:ng="http://angularjs.org" xmlns:fractalsvg="http://svg.pseudopattern.com" ng:app>
+<head>
+<title></title>
+<script src="angular-0.10.6.js"></script>
+<script src="math-part.js"></script>
+<script type="text/javascript">
+    function makeSVG(tag, attrs) {
+        var el= document.createElementNS('http://www.w3.org/2000/svg', tag);
+        for (var k in attrs)
+            el.setAttribute(k, attrs[k]);
+        return el;
+    }
+</script>
+<script type="text/javascript">
+
+DotsController = function () {
+    var controller = this;
+
+    this.x_spacing = 25;
+    this.y_spacing = 25;
+    this.x_margin = 20;
+    this.y_margin = 20;
+    this.radius = 10;
+    this.point_grid = new PointGrid(30, 30, -1.5, 1.5, -1.5, 1.5);
+    this.coords = this.point_grid.coords();
+    this.real = 1e-6;
+    this.imag = 0;
+    var update_lambda = function () {
+        controller.lambda = new ComplexNumber(controller.real, controller.imag);
+    }
+    this.$watch('real', update_lambda);
+    this.$watch('imag', update_lambda);
+
+    this.m = 3;
+    this.n = 2;
+    var update_map = function (old, newv) {
+        controller.map = new Mapper(controller.lambda, controller.m, controller.n);
+    }
+    this.$watch('m', update_map);
+    this.$watch('n', update_map);
+    this.$watch('lambda', update_map);
+
+    this.$watch('map', function () {
+        controller.escape = controller.point_grid.apply(controller.map);
+        controller.greedy = new Greedy(controller.escape);
+        controller.groups = controller.greedy.optimize();
+    })
+
+    this.show_groups = true;
+    this.show_dots = true;
+
+    this.colors = ["red", "orange", "yellow", "green", "blue"];
+
+    this.$watch('current_colors',function(scope,newValue,oldValue){
+        if(newValue === oldValue){
+            console.log("first run of current_colors check with");
+            console.log(newValue);
+            console.log("as the newValue");
+        } else {
+            console.log(newValue);
+            console.log("is the newValue");
+            controller.colors = newValue;
+        }
+    })
+
+}
+
+DotsController.prototype = {
+    color:function(n){
+        return this.colors[n % this.colors.length];
+    },
+    rate:function(pair){
+        return this.escape[pair[0]][pair[1]];
+    }
+
+}
+
+
+
+angular.directive('fractalsvg:config',function(expression){
+    return function(element){
+        this.$watch("color(rate(pair))",function(old,newv){
+            element.attr("fill",newv);
+        })
+    }
+});
+
+ColorController = function ($resource,$rootScope) {
+  this.Lovers = $resource(
+    "http://www.colourlovers.com/api/palettes/:what",
+     {format:'json',jsonCallback:'JSON_CALLBACK'},
+        {"new":{method:'JSONP',isArray:true,params:{what:"new"}},
+         "top":{method:'JSONP',isArray:true,params:{what:"top"}},
+         search:{method:'JSONP',isArray:true},
+         random:{method:'JSONP',isArray:true,params:{what:"random"}}}
+    )
+
+    this.root = $rootScope;
+
+    $rootScope.current_colors = ["red","blue"];
+
+    this.library = []
+    console.log(this.library);
+
+    this.library.push(this.top());
+    this.library.push(this.random());
+
+    console.log(this.library);
+}
+
+ColorController.$inject = ['$resource','$rootScope']
+
+ColorController.prototype = {
+  fetch: function(){
+    return this.Lovers.new()
+  },
+  "top": function(){
+    return this.Lovers.top()
+  },
+  search: function(){
+    return this.Lovers.search({keywords:this.query})
+  },
+  random: function(){
+    return this.Lovers.random()
+  },
+  set_current_color:function(palette){
+    console.log(palette);
+    this.root.current_colors = palette.colors;
+  },
+  circle:function(color){
+      var circle_size = "20px"
+      var returning = {width:circle_size,
+                    height:circle_size,
+                    "border-radius":"50%",
+                    "background-color":"#"+color,
+                    float:"left",
+                    margin:"2.5px"};
+      return returning;
+  }
+}
+
+</script>
+</head>
+<body>
+  <div ng:controller="DotsController" style="width:80%;float:left;">
+      m: <input ng:model="m" type="integer" min="2" max="10" size="2" />
+      n: <input ng:model="n" type="integer" min="1" max="11" size="2"/>
+      dots: <input ng:model="show_dots" type="checkbox" />
+      groups: <input ng:model="show_groups" type="checkbox" /><br/>
+      lambda: <input ng:model="real" min="-1" max="1" type="number" size="20" step="1e-7"/> +
+              <input ng:model="imag" min="-1" max="1" type="number" size="20" step="1e-7" />
+  <svg xmlns="http://www.w3.org/2000/svg">
+      <g ng:show="show_dots">They don't consume any US government services either
+      <g ng:repeat="pair in coords">
+          <circle 
+             ng:bind-attr='{"cx":"{{x_margin+x_spacing*pair[0]}}",
+                            "cy":"{{y_margin+y_spacing*pair[1]}}",
+                            "r":"{{radius}}"}'  fractalsvg:config="" />
+      </g>
+      </g>
+      <g ng:show="show_groups">
+      <g ng:repeat="g in groups">
+          <rect ng:bind-attr='{"x":"{{x_margin/2-2.5+x_spacing*g.x_min}}",
+                               "y":"{{y_margin/2-2.5+y_spacing*g.y_min}}",
+                               "width":"{{(g.x_max - g.x_min + 1)*x_spacing}}",
+                               "height":"{{(g.y_max - g.y_min + 1)*y_spacing}}"}'
+                  fill="none" stroke="black" stroke-width="1"/>
+      </g>
+      </g>
+  </svg>
+  </div>
+  <div ng:controller="ColorController" style="float:right;width:20%;">
+      <div ng:repeat="collection in library" >
+          <div ng:repeat="palette in collection" style="clear:both;">
+              {{palette.title}}
+              <button ng:click="set_current_color(palette)">Set now</button>
+              <div ng:repeat="color in palette.colors">
+                  <div ng:style="circle(color)"></div>
+              </div>
+          </div>
+      </div>
+  </div>
+</body>
+</html>
