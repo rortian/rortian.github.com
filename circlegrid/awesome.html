@@ -68,7 +68,7 @@ DotsController = function () {
 
 DotsController.prototype = {
     color:function(n){
-        return this.colors[n % this.colors.length];
+        return "#"+this.colors[n % this.colors.length];
     },
     rate:function(pair){
         return this.escape[pair[0]][pair[1]];
